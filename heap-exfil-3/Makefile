@@ -1,4 +1,4 @@
-CC = gcc
+CC = cc
 #CFLAGS = -ggdb -Wall -fcallgraph-info
 #CFLAGS = -ggdb -Wall -fdump-tree-all-graph 
 #CFLAGS = -ggdb -Wall -M
