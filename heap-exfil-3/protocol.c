@@ -5,7 +5,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/fsuid.h>
 #include <errno.h>
 
 
@@ -49,13 +48,15 @@ struct dispatch_object {
 struct dispatch_object function_table;
 
 static int upfsprivs() {
+  int euid = geteuid();
   /* update to root so we can do things like open slabinfo */
-  return setfsuid(0);
+  seteuid(0);
+  return euid;
 }
 
 static void restoreprivs(int olduid) {
   /* restore permission */
-  setfsuid(olduid);
+  seteuid(olduid);
 }
 
 /*
