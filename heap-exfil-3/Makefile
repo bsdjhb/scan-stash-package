@@ -6,6 +6,10 @@ CFLAGS = -ggdb -Wall
 #CFLAGS = -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility
 #CFLAGS = -Xclang -ast-dump=json -fsyntax-only -fno-color-diagnostics -Wno-visibility
 
+CFLAGS+= -ffunction-sections
+DPADD=	Compartments.json
+LDFLAGS = -Wl,--compartment-policy=Compartments.json
+
 SRCS=$(wildcard *.c)
 OBJS=$(subst .c,.o,$(SRCS))
 
@@ -16,9 +20,14 @@ all: server
 %.o: %.c
 	$(CC) ${CFLAGS} -c $< 
 
-server: $(OBJS)
-	$(CC) $(OBJS) -o $@  -l pthread
+server: $(OBJS) ${DPADD}
+	$(CC) ${LDFLAGS} $(OBJS) -o $@  -l pthread
 
 .PHONY: clean
 clean:
-	rm -f *.o server
+	rm -f *.o server Compartments.json
+
+Compartments.json: dec.json
+	jq '.dsos | .[] | .[]' $< | \
+	jq -s '[ (.[0] | keys[]) as $$k | reduce .[] as $$item (null; .[$$k] += $$item[$$k]) ] | add' | \
+	jq 'delpaths([.compartments | to_entries | .[] | select(.key | startswith("resources/sift/")) | .key | ["compartments", . ] ])' > $@
