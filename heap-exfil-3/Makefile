@@ -6,7 +6,7 @@ CFLAGS = -ggdb -Wall
 #CFLAGS = -Xclang -ast-dump -fsyntax-only -fno-color-diagnostics -Wno-visibility
 #CFLAGS = -Xclang -ast-dump=json -fsyntax-only -fno-color-diagnostics -Wno-visibility
 
-CFLAGS+= -ffunction-sections
+CFLAGS+= -ffunction-sections -cheri-codeptr-relocs
 DPADD=	Compartments.json
 LDFLAGS = -Wl,--compartment-policy=Compartments.json
 
@@ -21,7 +21,7 @@ all: server
 	$(CC) ${CFLAGS} -c $< 
 
 server: $(OBJS) ${DPADD}
-	$(CC) ${LDFLAGS} $(OBJS) -o $@  -l pthread
+	$(CC) ${CFLAGS} ${LDFLAGS} $(OBJS) -o $@  -l pthread
 
 .PHONY: clean
 clean:
